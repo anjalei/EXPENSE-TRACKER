@@ -1,62 +1,58 @@
-window.addEventListener("DOMContentLoaded", () => {
-    fetchUser();
-});
+// No fetchUser here
 
-async function fetchUser() {
-    try {
-        const res = await axios.get("http://localhost:3000/api/user");
-        const users = res.data;
-        document.getElementById("userlist").innerHTML = "";
-
-        users.forEach((user) => {
-            showUserOnScreen(user);
-        });
-
-       // document.getElementById("users").textContent = `${users}`;
-    } catch (error) {
-        document.body.innerHTML += "Something went wrong";
-        console.log(error);
-    }
-}
-
+// Signup functionality
 async function addUser(event) {
     event.preventDefault();
-    const username = document.getElementById("username").value;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    const obj = { username,email,password};
+    const username = document.getElementById("username")?.value;
+    const email = document.getElementById("email")?.value;
+    const password = document.getElementById("password")?.value;
+    const obj = { username, email, password };
 
-    
     if (!username || !email || !password) {
         alert("Please fill all the fields!");
         return;
     }
 
-
-    await addNewUser(obj);
-}
-
-async function addNewUser(obj) {
     try {
         const res = await axios.post("http://localhost:3000/api/post", obj);
-        showUserOnScreen(res.data);
-        console.log(res);
-   
+
+        // Clear form
         document.getElementById("username").value = "";
         document.getElementById("email").value = "";
         document.getElementById("password").value = "";
+
+        alert('Signup successful!');
+        window.location.href = 'welcome.html';
     } catch (error) {
-        document.body.innerHTML += "Something went wrong";
-        console.log(error);
+        console.error(error);
+        alert('Something went wrong during signup.');
     }
 }
 
-function showUserOnScreen(user) {
-    const parent = document.getElementById("users");
-    const li = document.createElement("li");
-    li.id = user.id; 
+// Login functionality
+async function loginUser(event) {
+    event.preventDefault();
+    const email = document.getElementById("loginemail")?.value;
+    const password = document.getElementById("loginpassword")?.value;
 
-    li.innerHTML = `${user.username} `
-    parent.appendChild(li);
-   
+    if (!email || !password) {
+        alert("Please fill all the fields!");
+        return;
+    }
+
+    try {
+        const res = await axios.post("http://localhost:3000/api/login", { email, password });
+
+        alert(res.data.message);
+        localStorage.setItem('token', res.data.token);
+        window.location.href = 'welcome.html';
+    } catch (error) {
+        console.error(error);
+
+        if (error.response && error.response.data && error.response.data.error) {
+            alert(error.response.data.error);
+        } else {
+            alert('Something went wrong during login.');
+        }
+    }
 }
