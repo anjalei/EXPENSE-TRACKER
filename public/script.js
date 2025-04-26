@@ -26,6 +26,13 @@ async function addUser(event) {
     const password = document.getElementById("password").value;
     const obj = { username,email,password};
 
+    
+    if (!username || !email || !password) {
+        alert("Please fill all the fields!");
+        return;
+    }
+
+
     await addNewUser(obj);
 }
 
@@ -34,7 +41,7 @@ async function addNewUser(obj) {
         const res = await axios.post("http://localhost:3000/api/post", obj);
         showUserOnScreen(res.data);
         console.log(res);
-        document.getElementById("users").textContent = ` : ${users}`;
+   
         document.getElementById("username").value = "";
         document.getElementById("email").value = "";
         document.getElementById("password").value = "";
