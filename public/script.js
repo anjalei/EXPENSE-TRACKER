@@ -1,6 +1,4 @@
-// No fetchUser here
 
-// Signup functionality
 async function addUser(event) {
     event.preventDefault();
     const username = document.getElementById("username")?.value;
@@ -16,20 +14,20 @@ async function addUser(event) {
     try {
         const res = await axios.post("http://localhost:3000/api/post", obj);
 
-        // Clear form
+       
         document.getElementById("username").value = "";
         document.getElementById("email").value = "";
         document.getElementById("password").value = "";
 
         alert('Signup successful!');
-        window.location.href = 'welcome.html';
+        window.location.href = 'expense.html';
     } catch (error) {
         console.error(error);
         alert('Something went wrong during signup.');
     }
 }
 
-// Login functionality
+
 async function loginUser(event) {
     event.preventDefault();
     const email = document.getElementById("loginemail")?.value;
@@ -45,7 +43,7 @@ async function loginUser(event) {
 
         alert(res.data.message);
         localStorage.setItem('token', res.data.token);
-        window.location.href = 'welcome.html';
+        window.location.href = 'expense.html';
     } catch (error) {
         console.error(error);
 

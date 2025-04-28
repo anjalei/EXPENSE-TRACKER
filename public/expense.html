@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PROJECT</title>
+    </head>
+    <body>
+        <div class = "container">
+            <form id="forms" class="forms">
+                <div>
+                    <label for="number"> Expense Amount</label>
+                    <input type="number" id="expenseamount" name="Expense Amount">
+                    <label for="text">Description</label>
+                    <input type="text" id="description" name="Category">
+                    <label for="category">Choose a Category</label>
+                    <select id="category" name="lists">
+                        <option value="movie">Movie</option>
+                        <option value="fuel">Fuel</option>
+                        <option value="food">Food</option>
+                        <option value="health">Health</option>
+                        <option value="electricity">Electricity</option>
+                        <option value="shopping">Shopping</option>
+                    </select>
+                    <button type="submit">Add</button>
+                </div>
+            </form>
+            <ul id = "expenselist"></ul>
+            
+        </div>
+        <h3 id="totalExpenses">Total Expenses: 0</h3>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script src="expense.js"></script>
+    </body>
+    </html>

@@ -2,13 +2,12 @@ const User = require('../model/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-// Add a new user (with password hashing)
+
 const addUser = async (req, res) => {
     try {
         const { username, email, password } = req.body;
         console.log(username, email, password);
 
-        // Hash the password before saving
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = await User.create({
@@ -24,7 +23,6 @@ const addUser = async (req, res) => {
     }
 };
 
-// Login user (compare hashed password)
 const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
