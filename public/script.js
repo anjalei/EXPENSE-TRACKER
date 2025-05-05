@@ -11,6 +11,8 @@ async function addUser(event) {
         return;
     }
 
+        alert('Signup successful!');
+        window.location.href = 'login.html';
     try {
         const res = await axios.post("http://localhost:3000/api/post", obj);
 
@@ -18,9 +20,8 @@ async function addUser(event) {
         document.getElementById("username").value = "";
         document.getElementById("email").value = "";
         document.getElementById("password").value = "";
-
-        alert('Signup successful!');
-        window.location.href = 'expense.html';
+        
+        
     } catch (error) {
         console.error(error);
         alert('Something went wrong during signup.');
@@ -40,10 +41,14 @@ async function loginUser(event) {
 
     try {
         const res = await axios.post("http://localhost:3000/api/login", { email, password });
-
-        alert(res.data.message);
+        
         localStorage.setItem('token', res.data.token);
+        alert(res.data.message);
+    
         window.location.href = 'expense.html';
+        
+        document.getElementById("username").value = "";
+        document.getElementById("email").value = "";
     } catch (error) {
         console.error(error);
 

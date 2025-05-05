@@ -13,7 +13,8 @@ app.use(express.json());
  app.use('/api',userRoutes);
  app.use('/api', expenseRoutes);
 
- 
+ User.hasMany(Expense);
+Expense.belongsTo(User);
 
  const port = 3000;
  sequelize.sync().then(res=>{
