@@ -13,7 +13,7 @@ async function fetchExpenses() {
 
         const res = await axios.get("http://localhost:3000/api/expense", {
             headers: {
-                'Authorization': `Bearer ${token}`  // Send token in the Authorization header
+                'Authorization': `Bearer ${token}`  
             }
         });
 
@@ -39,7 +39,7 @@ async function addExpense(event) {
     const category = document.getElementById("category").value;
     const obj = { expenseamount, description, category };
 
-    // Add the expense and send the userId along with the expense data
+   
     await addNewExpenses(obj);
 }
 async function addNewExpenses(obj) {

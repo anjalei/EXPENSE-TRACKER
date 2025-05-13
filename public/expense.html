@@ -5,6 +5,28 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PROJECT</title>
+    <style>
+        #checkout-button {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background-color: gold;
+          color: black;
+          padding: 10px 20px;
+          border: none;
+          border-radius: 8px;
+          font-weight: bold;
+          cursor: pointer;
+          box-shadow: 0 4px 6px rgba(46, 43, 24, 0.2);
+          z-index: 999;
+        }
+      
+        #checkout-button:hover {
+          background-color: #ffd700;
+        }
+      </style>
+    
+
     </head>
     <body>
         <div class = "container">
@@ -25,12 +47,17 @@
                     </select>
                     <button type="submit">Add</button>
                 </div>
+              
             </form>
             <ul id = "expenselist"></ul>
-            
+
+             <button id="checkout-button">Buy Premium</button>
+
         </div>
         <h3 id="totalExpenses">Total Expenses: 0</h3>
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+         <script src="https://js.stripe.com/v3/"></script>
         <script src="expense.js"></script>
+         <script src="premium.js"></script>
     </body>
     </html>
