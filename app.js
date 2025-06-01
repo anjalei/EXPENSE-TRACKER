@@ -1,20 +1,23 @@
 const express = require('express');
 const app = express();
 require('dotenv').config();
+const bodyParser = require('body-parser');
 const axios = require('axios');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const cors = require('cors');
+const path = require('path');
 
 const sequelize = require('./util/database');
-const cors = require('cors');
+
 
 const userRoutes = require('./routes/user');
 const expenseRoutes = require('./routes/expense');
 const paymentRoutes = require('./routes/payment');
-const webhookRoutes = require('./routes/webhook');
+const leaderboardRoutes = require('./routes/leaderboard');
+
 
 const User = require('./model/user');
 const Expense = require('./model/expense');
-const Premium = require('./model/premium');
+const Premium = require('./model/Premium');
 
 
 User.hasMany(Expense);
@@ -28,13 +31,17 @@ app.use(cors());
 app.use(express.static('public'));
 
 
-app.use('/webhook', express.raw({ type: 'application/json' }), webhookRoutes);
+
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use('/api', userRoutes);
 app.use('/api', expenseRoutes);
-app.use('/api', paymentRoutes);
+app.use('/payment', paymentRoutes);
+app.use('/api/premium', leaderboardRoutes);
+console.log("✅ APP_ID:", process.env.APP_ID);
+console.log("✅ SECRET_KEY:", process.env.SECRET_KEY);
 
 
 const port = 3000;

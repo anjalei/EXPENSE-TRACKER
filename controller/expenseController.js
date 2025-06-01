@@ -2,10 +2,16 @@ const Expense = require('../model/expense');
 
 const getExpense = async (req, res) => {
     try {
+         const userId = req.user.id;
+    const isPremium = req.user.isPremium;
         const expenses = await Expense.findAll({
-            where: { userId: req.user.id }
+            where: { userId: req.user.id },
+            order: [["createdAt", "DESC"]],
         });
-        res.json(expenses);
+       return res.json({
+      isPremium,
+      expenses,
+    });
     } catch (error) {
         res.status(500).json({ error: 'Something went wrong' });
     }

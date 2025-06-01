@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("forms");
     form.addEventListener("submit", addExpense);
     fetchExpenses(); 
+    document.getElementById("leaderboard-btn").addEventListener("click", showLeaderboard); 
 });
 
 async function fetchExpenses() {
@@ -16,21 +17,62 @@ async function fetchExpenses() {
                 'Authorization': `Bearer ${token}`  
             }
         });
+     const isPremiumUser = res.data.isPremium;
+    const expenses = res.data.expenses; 
 
-        const expenses = res.data;
+        if (isPremiumUser) {
+            document.getElementById("premium-msg").innerText = "🌟 You are a premium user now!";
+            document.getElementById("checkout-button").style.display = "none"; 
+            document.getElementById("leaderboard-btn").style.display = "block"; 
+          
+        } else {
+            document.getElementById("premium-msg").innerText = "";  
+            document.getElementById("checkout-button").style.display = "inline-block";  
+            document.getElementById("leaderboard-btn").style.display = "none"; 
+        }
+
         document.getElementById("expenselist").innerHTML = "";
-
+        totalexpenses = 0;  
         expenses.forEach((expense) => {
             showExpenseOnScreen(expense);
         });
 
         document.getElementById("totalExpenses").textContent = `Total Expenses : ${totalexpenses}`;
+
     } catch (error) {
         console.error(error);
         alert(`Error: ${error.message}`);
         document.body.innerHTML += "Something went wrong";
     }
 }
+
+async function showLeaderboard() {
+    const token = localStorage.getItem("token");
+
+    try {
+        const res = await axios.get("http://localhost:3000/api/premium/leaderboard", {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const leaderboardData = res.data.leaderboard;
+
+        const leaderboardSection = document.getElementById("leaderboard");
+        leaderboardSection.innerHTML = "<h3>🏆 Leaderboard</h3>";
+
+        const list = document.createElement("ol");
+        leaderboardData.forEach(user => {
+            const listItem = document.createElement("li");
+            listItem.textContent = `${user.username} - ₹${user.totalSpent}`;
+            list.appendChild(listItem);
+        });
+
+        leaderboardSection.appendChild(list);
+    } catch (err) {
+        console.error("Error fetching leaderboard", err);
+        alert("Failed to load leaderboard.");
+    }
+}
+
 async function addExpense(event) {
     console.log('adding expense');
     event.preventDefault();
@@ -39,9 +81,9 @@ async function addExpense(event) {
     const category = document.getElementById("category").value;
     const obj = { expenseamount, description, category };
 
-   
     await addNewExpenses(obj);
 }
+
 async function addNewExpenses(obj) {
     try {
         const token = localStorage.getItem("token");  
@@ -63,23 +105,28 @@ async function addNewExpenses(obj) {
         document.body.innerHTML += "Something went wrong";
     }
 }
+
 function showExpenseOnScreen(expense) {
     const parent = document.getElementById("expenselist");
     const li = document.createElement("li");
     li.id = expense.id; 
 
-    li.innerHTML = `${expense.expenseamount} ${expense.description} ${expense.category}
-    <input type="button" value="Delete" onclick="deleteExpense('${expense.id}','${expense.expenseamount}')">
-    <input type="button" value="Edit" onclick="editExpense('${expense.id}','${expense.expenseamount}','${expense.description}','${expense.category}')">`;
+   
+    li.innerHTML = `
+        ${expense.expenseamount} ${expense.description} ${expense.category}
+        <input type="button" value="Delete" onclick="deleteExpense('${expense.id}', '${expense.expenseamount}')">
+        <input type="button" value="Edit" onclick="editExpense('${expense.id}', '${expense.expenseamount}', '${expense.description}', '${expense.category}')">
+    `;
 
     parent.appendChild(li);
-    totalexpenses+= +expense.expenseamount;
-
+    totalexpenses += +expense.expenseamount;
 }
+
 async function deleteExpense(expenseId, expenseamount) {
     try {
         const token = localStorage.getItem("token"); 
 
+      
         const res = await axios.delete(`http://localhost:3000/api/deleteexpense/${expenseId}`, {
             headers: {
                 'Authorization': `Bearer ${token}` 
@@ -98,6 +145,7 @@ async function deleteExpense(expenseId, expenseamount) {
         document.body.innerHTML += "Something went wrong";
     }
 }
+
 async function editExpense(expenseId, expenseamount, description, category) {
     console.log(expenseId, expenseamount, description, category);
 

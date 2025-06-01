@@ -1,29 +1,69 @@
-document.addEventListener("DOMContentLoaded", function () {
-const stripe = Stripe("pk_test_51RMgRXPslAih4KSM2pbKfnWtqIGpYQWp1BXJQzJPCjROm3PRjeYm60dSFndija1BD89Sqd3taTMZnvVdoRoqwpYi00H2Mh4IOm");
+document.addEventListener("DOMContentLoaded", () => {
+  const checkoutBtn = document.getElementById("checkout-button");
+  const statusDiv   = document.getElementById("status-message");
+  const backBtn     = document.getElementById("back-button");
+   const params = new URLSearchParams(window.location.search); 
+ const token = localStorage.getItem("token");
 
-document.getElementById("checkout-button").addEventListener("click", async () => {
+  const cashfree = Cashfree({ mode: "sandbox" });
+
+  if (checkoutBtn) {
+    checkoutBtn.addEventListener("click", async () => {
   try {
+        console.log("📦 Sending token:", token);
   
     const response = await axios.post(
-      "http://localhost:3000/api/create-checkout-session",
-      {},  
+          "http://localhost:3000/payment/pay",
+          { amount: 100 },
       {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
       }
     );
 
-    const sessionId = response.data.sessionId;
+        const paymentSessionId = response.data.payment_session_id;
     
-    const { error } = await stripe.redirectToCheckout({ sessionId });
+        let checkoutOptions = {
+          paymentSessionId,
+          redirectTarget: "_self",
+        };
 
-    if (error) {
-      console.error("Stripe redirect error:", error);
-      alert("TRANSACTION FAILED");
+        await cashfree.checkout(checkoutOptions);
+      } catch (err) {
+        console.error("Payment Error 💥:", err);
+      }
+    });
+  }
+
+  // Handle payment result
+ 
+  const success = params.get("success");
+
+  if (success === "true") {
+    statusDiv.innerHTML = `<h2 style="color:green;">🎉 Payment Successful! You are now a Premium Member.</h2>`;
+  } else if (success === "false") {
+    statusDiv.innerHTML = `<h2 style="color:red;">❌ Payment Failed or Cancelled. Please try again.</h2>`;
     }
 
-  } catch (err) {
-    console.error("Checkout session error:", err);
-    alert("TRANSACTION FAILED");
+  // Check premium status
+  if (token) {
+    axios.get("http://localhost:3000/api/user/status", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then(({ data }) => {
+      if (data.isPremium && success !== "true") {
+        statusDiv.innerHTML = `<h2 style="color:blue;">⭐ You are already a Premium Member.</h2>`;
+      }
+    })
+    .catch(err => console.error("Error checking user status", err));
   }
+
+  // Back button
+  backBtn.addEventListener("click", () => {
+    localStorage.removeItem("token");
+window.location.href = "/login.html";
+    // window.location.href = "/expense.html";
 });
 });

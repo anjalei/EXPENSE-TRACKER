@@ -6,58 +6,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PROJECT</title>
     <style>
-        #checkout-button {
-          position: fixed;
-          top: 20px;
-          right: 20px;
-          background-color: gold;
-          color: black;
-          padding: 10px 20px;
-          border: none;
-          border-radius: 8px;
-          font-weight: bold;
-          cursor: pointer;
-          box-shadow: 0 4px 6px rgba(46, 43, 24, 0.2);
-          z-index: 999;
-        }
-      
-        #checkout-button:hover {
-          background-color: #ffd700;
-        }
-      </style>
+      #checkout-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: gold;
+        color: black;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(46, 43, 24, 0.2);
+        z-index: 999;
+      }
+
+      #checkout-button:hover {
+        background-color: #ffd700;
+      }
+    </style>
     
 
-    </head>
-    <body>
+  </head>
+  <body>
+      <h2 id="premium-msg" style="color: green; text-align: center;"></h2>
+
         <div class = "container">
-            <form id="forms" class="forms">
-                <div>
+      <form id="forms" class="forms">
+        <div>
                     <label for="number"> Expense Amount</label>
                     <input type="number" id="expenseamount" name="Expense Amount">
-                    <label for="text">Description</label>
+          <label for="text">Description</label>
                     <input type="text" id="description" name="Category">
-                    <label for="category">Choose a Category</label>
-                    <select id="category" name="lists">
-                        <option value="movie">Movie</option>
-                        <option value="fuel">Fuel</option>
-                        <option value="food">Food</option>
-                        <option value="health">Health</option>
-                        <option value="electricity">Electricity</option>
-                        <option value="shopping">Shopping</option>
-                    </select>
-                    <button type="submit">Add</button>
-                </div>
+          <label for="category">Choose a Category</label>
+          <select id="category" name="lists">
+            <option value="movie">Movie</option>
+            <option value="fuel">Fuel</option>
+            <option value="food">Food</option>
+            <option value="health">Health</option>
+            <option value="electricity">Electricity</option>
+            <option value="shopping">Shopping</option>
+          </select>
+          <button type="submit">Add</button>
+        </div>
               
-            </form>
+      </form>
             <ul id = "expenselist"></ul>
 
-             <button id="checkout-button">Buy Premium</button>
+      <ul id="expenselist"></ul>
+      <button id="checkout-button">Buy Premium</button>
 
-        </div>
-        <h3 id="totalExpenses">Total Expenses: 0</h3>
-        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-         <script src="https://js.stripe.com/v3/"></script>
-        <script src="expense.js"></script>
-         <script src="premium.js"></script>
-    </body>
-    </html>
+    </div>
+
+    <h3 id="totalExpenses">Total Expenses: 0</h3>
+
+        <button id="leaderboard-btn" style="display: none; margin: 20px auto; display: block;">Show Leaderboard</button>
+    <div id="leaderboard" style="margin-top: 30px; text-align: center;"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+         
+    <script src="expense.js"></script>
+    <script src="premium.js"></script>
+  </body>
+</html>
+
+

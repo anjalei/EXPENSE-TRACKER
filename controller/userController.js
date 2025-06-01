@@ -59,7 +59,25 @@ const loginUser = async (req, res) => {
     }
 };
 
+getUserStatus = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    const user = await User.findByPk(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.status(200).json({ isPremium: user.isPremium });
+  } catch (err) {
+    console.error('Error in getUserStatus:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 module.exports = {
     addUser,
-    loginUser
+    loginUser,
+ getUserStatus
 };
