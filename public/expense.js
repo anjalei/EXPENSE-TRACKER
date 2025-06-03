@@ -53,8 +53,8 @@ async function showLeaderboard() {
         const res = await axios.get("http://localhost:3000/api/premium/leaderboard", {
             headers: { Authorization: `Bearer ${token}` }
         });
+const leaderboardData = res.data;
 
-        const leaderboardData = res.data.leaderboard;
 
         const leaderboardSection = document.getElementById("leaderboard");
         leaderboardSection.innerHTML = "<h3>🏆 Leaderboard</h3>";

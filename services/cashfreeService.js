@@ -1,10 +1,10 @@
 require('dotenv').config();
 const { Cashfree } = require("cashfree-pg");
 
-// Set environment
+
 Cashfree.XClientId = process.env.APP_ID;
 Cashfree.XClientSecret = process.env.SECRET_KEY;
-Cashfree.XEnvironment = "SANDBOX"; // Use "PRODUCTION" in real deployment
+Cashfree.XEnvironment = "SANDBOX"; 
 
 exports.createOrder = async (orderRequest) => {
   try {

@@ -5,30 +5,31 @@ const sequelize = require('../util/database');
 
 exports.getLeaderboard = async (req, res) => {
   try {
-    const leaderboard = await Expense.findAll({
+    const leaderboard = await User.findAll({
       attributes: [
-        'userId',
-        [sequelize.fn('SUM', sequelize.col('expenseamount')), 'totalSpent']
+        'id',
+        'username',
+        [sequelize.fn('COALESCE', sequelize.fn('SUM', sequelize.col('expenses.expenseamount')), 0), 'totalSpent']
       ],
       include: [
         {
-          model: User,
-          attributes: ['username'],
-          required: true // this ensures the join must return a User
+          model: Expense,
+          attributes: [],
+          required: false  
         }
       ],
-      group: ['userId'],
+      group: ['User.id'],
       order: [[sequelize.literal('totalSpent'), 'DESC']]
     });
 
     const formattedData = leaderboard.map(entry => ({
-      username: entry.user?.username || "Unknown",
-      totalSpent: entry.getDataValue('totalSpent')
+      username: entry.username,
+      totalSpent: parseFloat(entry.getDataValue('totalSpent')) || 0
     }));
 
-    res.status(200).json({ leaderboard: formattedData });
+    res.status(200).json(formattedData);
   } catch (err) {
-    console.error("🔴 Error fetching leaderboard:", err);
-    res.status(500).json({ message: "Something went wrong in leaderboard" });
+    console.error('Error fetching leaderboard:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
