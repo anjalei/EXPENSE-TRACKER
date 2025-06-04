@@ -11,7 +11,7 @@ const Expense = sequelize.define('expense',{
         unique : true
     },
     expenseamount:{
-        type : DataTypes.STRING,
+        type : DataTypes.DECIMAL(10, 2),
         allowNull : false,
     },
     description:{
@@ -22,5 +22,6 @@ const Expense = sequelize.define('expense',{
         type : DataTypes.STRING,
         allowNull : false,
     }
+
 });
 module.exports = Expense;
