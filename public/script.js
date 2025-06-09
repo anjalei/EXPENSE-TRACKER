@@ -1,18 +1,5 @@
 
 
-document.addEventListener("DOMContentLoaded", () => {
-  // ───── Signup ─────
-  const signupForm = document.getElementById("signup-form");
-  if (signupForm) {
-    signupForm.addEventListener("submit", addUser);
-  }
-
-  // ───── Login ─────
-  const loginForm = document.getElementById("forms");  // your login <form id="forms">
-  if (loginForm) {
-    loginForm.addEventListener("submit", loginUser);
-  }
-});
 async function addUser(event) {
     event.preventDefault();
     const username = document.getElementById("username")?.value;
@@ -55,10 +42,10 @@ async function loginUser(event) {
 
     try {
         const res = await axios.post("http://localhost:3000/api/login", { email, password });
-        
-        localStorage.setItem('token', res.data.token);
+            const { token, isPremiumUser, message } = res.data; 
+        localStorage.setItem('token', token);
         alert(res.data.message);
-         
+         localStorage.setItem('isPremiumUser', isPremiumUser);
 
         window.location.href = 'expense.html';
         
@@ -73,6 +60,36 @@ async function loginUser(event) {
         }
     }
 }
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const forgotBtn = document.getElementById("forgot-password-btn");
+  const forgotForm = document.getElementById("forgot-password-form");
+  const resetForm = document.getElementById("reset-password-form");
+
+  if (forgotBtn && forgotForm && resetForm) {
+   
+    forgotBtn.addEventListener("click", () => {
+      forgotForm.style.display = "block";
+    });
+
+   
+    resetForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const email = document.getElementById("reset-email").value;
+
+      try {
+        await axios.post("http://localhost:3000/api/password/forgotpassword", { email });
+        alert("If the email exists, a reset link has been sent.");
+        resetForm.reset();
+        forgotForm.style.display = "none";
+      } catch (error) {
+        console.error("Password reset error:", error);
+        alert("Something went wrong. Try again.");
+      }
+    });
+  }
+});
 
 
 document.addEventListener("DOMContentLoaded", () => {

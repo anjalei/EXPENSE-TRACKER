@@ -15,22 +15,32 @@ async function fetchExpenses() {
     const res = await axios.get("http://localhost:3000/api/expense", {
       headers: { 'Authorization': `Bearer ${token}` }
     });
-
-    const isPremiumUser = res.data.isPremium;
+const userStatusRes = await axios.get("http://localhost:3000/api/user/status", {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const isPremiumUser = userStatusRes.data.isPremium;
+  
     const expenses = res.data.expenses;
 
-    // Show/hide premium UI
+  
     if (isPremiumUser) {
       document.getElementById("premium-msg").innerText = "🌟 You are a premium user now!";
       document.getElementById("checkout-button").style.display = "none";
       document.getElementById("leaderboard-btn").style.display = "block";
+      document.getElementById("downloadBtn").style.display = "block";
+      document.getElementById("premium-section").style.display = "block";
+
+
     } else {
       document.getElementById("premium-msg").innerText = "";
       document.getElementById("checkout-button").style.display = "inline-block";
       document.getElementById("leaderboard-btn").style.display = "none";
+      document.getElementById("downloadBtn").style.display = "none";
+      document.getElementById("premium-section").style.display = "none";
+
     }
 
-    // Clear list and recalc
+    
     document.getElementById("expenselist").innerHTML = "";
     totalexpenses = 0;
 
