@@ -2,23 +2,42 @@ const Expense = require('../model/expense');
 const User = require('../model/user');
 const sequelize = require('../util/database');
 
+
 const getExpense = async (req, res) => {
     try {
-         const userId = req.user.id;
-    const isPremium = req.user.isPremium;
+        const userId = req.user.id;
+        const isPremium = req.user.isPremium;
+
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 10;
+        const offset = (page - 1) * limit;
+
+        const totalCount = await Expense.count({ where: { userId } });
+
+
         const expenses = await Expense.findAll({
-            where: { userId: req.user.id },
-            order: [["createdAt", "DESC"]],
+            where: { userId },
+            order: [['createdAt', 'DESC']],
+            limit,
+            offset,
         });
-       return res.json({
-      isPremium,
-      expenses,
-    });
+
+        const user = await User.findByPk(userId);
+        const totalExpense = parseFloat(user.totalExpense) || 0;
+
+        return res.json({
+            isPremium,
+            expenses,
+            totalCount,
+            totalExpense,
+            currentPage: page,
+            pageSize: limit,
+        });
     } catch (error) {
+        console.error('Error fetching expenses:', error);
         res.status(500).json({ error: 'Something went wrong' });
     }
 };
-
 const getExpenseById = async (req, res) => {
     try {
         const expense = await Expense.findOne({
@@ -121,6 +140,7 @@ const deleteExpenseById = async (req, res) => {
         res.status(500).json({ error: 'Something went wrong' });
     }
 };
+
 
 
 module.exports = {

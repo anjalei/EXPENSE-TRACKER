@@ -1,4 +1,8 @@
 let totalexpenses = 0;
+let currentPage = 1;
+let pageSize = 10;
+let totalPages = 1;
+
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("forms");
@@ -7,49 +11,84 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("leaderboard-btn").addEventListener("click", showLeaderboard);
 });
 
+document.getElementById("pageSize").addEventListener("change", e => {
+  pageSize = parseInt(e.target.value, 10);
+  currentPage = 1;
+  fetchExpenses();
+});
+
+document.getElementById("prevPageBtn").addEventListener("click", () => {
+  if (currentPage > 1) {
+    currentPage--;
+    fetchExpenses();
+  }
+});
+
+document.getElementById("nextPageBtn").addEventListener("click", () => {
+  if (currentPage < totalPages) {
+    currentPage++;
+    fetchExpenses();
+  }
+});
+
+
 async function fetchExpenses() {
   try {
     const token = localStorage.getItem("token");
     console.log("🔁 fetchExpenses() token:", token);
 
-    const res = await axios.get("http://localhost:3000/api/expense", {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-const userStatusRes = await axios.get("http://localhost:3000/api/user/status", {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const isPremiumUser = userStatusRes.data.isPremium;
-  
-    const expenses = res.data.expenses;
 
-  
+    const res = await axios.get(
+      `http://localhost:3000/api/expense?page=${currentPage}&limit=${pageSize}`,
+      { headers: { 'Authorization': `Bearer ${token}` } }
+    );
+    const userStatusRes = await axios.get(
+      "http://localhost:3000/api/user/status",
+      { headers: { 'Authorization': `Bearer ${token}` } }
+    );
+    const isPremiumUser = userStatusRes.data.isPremium;
+
+    const {
+      expenses,
+      totalCount,
+      totalExpense: serverTotalExpense,
+      currentPage: serverPage,
+      pageSize: serverPageSize
+    } = res.data;
+    totalPages = Math.ceil(totalCount / serverPageSize);
+    currentPage = serverPage;
+    pageSize = serverPageSize;
+
     if (isPremiumUser) {
       document.getElementById("premium-msg").innerText = "🌟 You are a premium user now!";
       document.getElementById("checkout-button").style.display = "none";
       document.getElementById("leaderboard-btn").style.display = "block";
       document.getElementById("downloadBtn").style.display = "block";
       document.getElementById("premium-section").style.display = "block";
-
-
     } else {
       document.getElementById("premium-msg").innerText = "";
       document.getElementById("checkout-button").style.display = "inline-block";
       document.getElementById("leaderboard-btn").style.display = "none";
       document.getElementById("downloadBtn").style.display = "none";
       document.getElementById("premium-section").style.display = "none";
-
     }
 
-    
-    document.getElementById("expenselist").innerHTML = "";
-    totalexpenses = 0;
 
-    expenses.forEach((expense) => {
-      showExpenseOnScreen(expense);
-      totalexpenses += parseFloat(expense.expenseamount);
-    });
+    const listEl = document.getElementById("allExpenselist");
+    listEl.innerHTML = "";
+    expenses.forEach(exp => showExpenseOnScreen(exp));
 
-    document.getElementById("totalExpenses").textContent = `Total Expenses : ₹${totalexpenses}`;
+    totalexpenses = parseFloat(serverTotalExpense);
+    document.getElementById("totalExpenses").textContent =
+      `Total Expenses : ₹${totalexpenses}`;
+
+    document.getElementById("pageInfo").textContent =
+      `Page ${currentPage} of ${totalPages}`;
+
+      if (totalPages === 0) {
+  currentPage = 1;
+  totalPages = 1;
+}
 
   } catch (error) {
     console.error(error);
@@ -101,17 +140,15 @@ async function addNewExpenses(obj) {
       headers: { 'Authorization': `Bearer ${token}` }
     });
 
-    // The backend returns { expense: newExpense, totalExpense: updatedTotal }
     const { expense, totalExpense } = res.data;
 
-    // 1. Show the new expense in the list
+
     showExpenseOnScreen(expense);
 
-    // 2. Update the total from the server
     totalexpenses = parseFloat(totalExpense);
     document.getElementById("totalExpenses").textContent = `Total Expenses : ₹${totalexpenses}`;
 
-    // 3. Clear the input fields
+  
     document.getElementById("expenseamount").value = "";
     document.getElementById("description").value = "";
     document.getElementById("category").value = "";
@@ -124,7 +161,7 @@ async function addNewExpenses(obj) {
 }
 
 function showExpenseOnScreen(expense) {
-  const parent = document.getElementById("expenselist");
+const parent = document.getElementById("allExpenselist");
   const li = document.createElement("li");
   li.id = expense.id;
 
@@ -144,15 +181,15 @@ async function deleteExpense(expenseId) {
       headers: { 'Authorization': `Bearer ${token}` }
     });
 
-    // Remove from DOM
+   
     const expenseDetails = document.getElementById(expenseId);
     if (expenseDetails) expenseDetails.remove();
 
-    // Update total from server response
+  
     totalexpenses = res.data.totalExpense;
     document.getElementById("totalExpenses").textContent = `Total Expenses : ₹${totalexpenses}`;
     console.log("Expense deleted successfully.");
-
+ await fetchExpenses();
   } catch (error) {
     console.error(error);
     alert(`Error: ${error.message}`);
@@ -161,20 +198,19 @@ async function deleteExpense(expenseId) {
 }
 
 async function editExpense(expenseId, expenseamount, description, category) {
-  // 1. Pre-fill the form
+
   document.getElementById("expenseamount").value = expenseamount;
   document.getElementById("description").value = description;
   document.getElementById("category").value = category;
 
-  // 2. Remove the item from the list (we’ll re-render everything upon success)
+  
   const expenseDetails = document.getElementById(expenseId);
   if (expenseDetails) expenseDetails.remove();
 
-  // 3. Change the submit button into “Update”
+
   const submitButton = document.querySelector('button[type="submit"]');
   submitButton.textContent = "Update Expense";
 
-  // 4. Replace its onclick with the update-routine
   submitButton.onclick = async function (event) {
     event.preventDefault();
     try {
@@ -191,21 +227,19 @@ async function editExpense(expenseId, expenseamount, description, category) {
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
 
-      // Backend returns { message: "...", totalExpense: updatedTotal }
       const updatedTotal = res.data.totalExpense;
       totalexpenses = updatedTotal;
       document.getElementById("totalExpenses").textContent = `Total Expenses : ₹${totalexpenses}`;
 
-      // Clear the old list and re-fetch everything fresh
-      document.getElementById("expenselist").innerHTML = "";
+ document.getElementById("allExpenselist").innerHTML = "";
+
       await fetchExpenses();
 
-      // Clear the inputs
+     
       document.getElementById("expenseamount").value = "";
       document.getElementById("description").value = "";
       document.getElementById("category").value = "";
 
-      // Restore the button to normal “ADD” behavior
       submitButton.textContent = "ADD";
       submitButton.onclick = (e) => addExpense(e);
 

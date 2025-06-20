@@ -25,7 +25,7 @@
         background-color: #ffd700;
       }
 
-      /* === New Global Styles === */
+    
       :root {
         --primary: #2c7a7b;
         --light: #e6fffa;
@@ -35,7 +35,7 @@
       body {
         font-family: sans-serif;
         margin: 0;
-        padding-bottom: 4rem; /* space for download button */
+        padding-bottom: 4rem; 
       }
       h1, h2 {
         text-align: center;
@@ -80,7 +80,7 @@
       .text-success { color: green; }
       .text-danger { color: var(--danger); }
 
-      /* Floating Download Button */
+   
       #downloadBtn {
         position: fixed;
         bottom: 1.5rem;
@@ -104,11 +104,9 @@
   </head>
 
   <body>
-    <!-- Premium message -->
+    
     <h2 id="premium-msg"></h2>
-
     <div class="container">
-      <!-- Your expense form -->
       <form id="forms" class="forms">
         <div>
           <label for="expenseamount">Expense Amount</label>
@@ -130,22 +128,34 @@
         </div>
       </form>
 
-      <!-- Existing expense list -->
-      <ul id="expenselist"></ul>
+      <div style="text-align: center; margin: 10px;">
+  <label for="pageSize">Items per page:</label>
+  <select id="pageSize">
+    <option value="5">5</option>
+    <option value="10" selected>10</option>
+    <option value="15">15</option>
+  </select>
+</div>
 
-      <!-- Buy Premium -->
+<ul id="allExpenselist"></ul>
+
+<div style="text-align: center; margin: 20px;">
+  <button id="prevPageBtn">⬅️ Prev</button>
+  <span id="pageInfo">Page 1 of 1</span>
+  <button id="nextPageBtn">Next ➡️</button>
+</div>
+
+
+
+
       <button id="checkout-button">Buy Premium</button>
     </div>
 
-    <!-- Total expenses -->
     <h3 id="totalExpenses" style="text-align:center;">Total Expenses: ₹0</h3>
 
-    <!-- Leaderboard -->
     <button id="leaderboard-btn" style="margin: 20px auto; display: block;">Show Leaderboard</button>
     <div id="leaderboard" style="margin-top: 30px; text-align: center;"></div>
 
-
-    <!-- === NEW: Filter Bar & Tables (Premium Only) === -->
     <div id="premium-section" style="display:none;">
       <h1>Day to Day Expenses</h1>
       <div class="filter-bar">
@@ -157,7 +167,6 @@
         </select>
       </div>
 
-      <!-- Day-to-day -->
       <table>
         <thead>
           <tr>
@@ -177,7 +186,7 @@
         </tfoot>
       </table>
 
-      <!-- Yearly -->
+
       <h2>Yearly Report</h2>
       <table>
         <thead>
@@ -191,7 +200,7 @@
         </tbody>
       </table>
 
-      <!-- Notes -->
+   
       <h2>Notes Report</h2>
       <table>
         <thead>
@@ -203,140 +212,11 @@
       </table>
     </div>
 
-    <!-- Download button -->
     <button id="downloadBtn" onclick="downloadExpenses()">⬇</button>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
     <script src="expense.js"></script>
     <script src="premium.js"></script>
 
-    <script>
-      
-
-      window.addEventListener('load', () => {
-        // Show/hide premium section & download button
-        if (isPremiumUser) {
-          document.getElementById('premium-section').style.display = 'block';
-          document.getElementById('downloadBtn').disabled = false;
-          document.getElementById('premium-msg').innerText = '🌟 Premium Features Unlocked!';
-        } else {
-          document.getElementById('premium-section').style.display = 'none';
-          document.getElementById('downloadBtn').disabled = true;
-          document.getElementById('premium-msg').innerText = '';
-        }
-
-        // 1) Fetch your allTransactions data here…
-        // 2) Call filterTransactions() to render initial view
-      });
-
-      // ---- Your filter & render logic ----
-      let allTransactions = []; // fill this from your API
-
-      function filterTransactions() {
-        const filter = document.getElementById('filterType').value;
-        const today = new Date();
-        const dayStart = new Date(today); dayStart.setHours(0,0,0,0);
-        const weekStart = new Date(today);
-        weekStart.setDate(today.getDate() - today.getDay());
-        weekStart.setHours(0,0,0,0);
-
-        const filtered = allTransactions.filter(tx => {
-          const d = new Date(tx.date);
-          if (filter === 'daily')  return d >= dayStart && d <= today;
-          if (filter === 'weekly') return d >= weekStart && d <= today;
-          if (filter === 'monthly')
-            return d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
-          return true;
-        });
-
-        renderDayTable(filtered);
-        renderYearlyReport(filtered);
-        renderNotes(filtered);
-      }
-
-      function renderDayTable(data) {
-        const tbody = document.getElementById('dayTable');
-        tbody.innerHTML = '';
-        let incomeSum = 0, expenseSum = 0;
-
-        if (!data.length) {
-          tbody.innerHTML = '<tr><td colspan="5" class="text-center">No data</td></tr>';
-        } else {
-          data.forEach(tx => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td>${new Date(tx.date).toLocaleDateString()}</td>
-              <td>${tx.description}</td>
-              <td>${tx.category}</td>
-              <td class="text-center">${tx.type==='income'? '₹'+tx.amount.toFixed(2) : '₹0.00'}</td>
-              <td class="text-center">${tx.type==='expense'? '₹'+tx.amount.toFixed(2) : '₹0.00'}</td>
-            `;
-            tbody.appendChild(tr);
-            tx.type==='income' ? incomeSum += tx.amount : expenseSum += tx.amount;
-          });
-        }
-
-        // update totals row
-        const foot = tbody.parentNode.querySelector('tfoot tr').children;
-        foot[3].innerText = `₹${incomeSum.toFixed(2)}`;
-        foot[4].innerText = `₹${expenseSum.toFixed(2)}`;
-      }
-
-      function renderYearlyReport(data) {
-        // group by month…
-        const monthMap = {};
-        data.forEach(tx => {
-          const d = new Date(tx.date);
-          const key = d.toLocaleString('default',{ month:'long', year:'numeric' });
-          monthMap[key] = monthMap[key] || { income:0, expense:0 };
-          monthMap[key][tx.type] += tx.amount;
-        });
-        const tbody = document.getElementById('yearlyReport');
-        tbody.innerHTML = '';
-        for (let m in monthMap) {
-          const inc = monthMap[m].income, exp = monthMap[m].expense;
-          const save = inc - exp;
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${m}</td>
-            <td class="text-center">₹${inc.toFixed(2)}</td>
-            <td class="text-center">₹${exp.toFixed(2)}</td>
-            <td class="text-center">₹${save.toFixed(2)}</td>
-          `;
-          tbody.appendChild(tr);
-        }
-        if (!Object.keys(monthMap).length) {
-          tbody.innerHTML = '<tr><td colspan="4" class="text-center">No data</td></tr>';
-        }
-      }
-
-      function renderNotes(data) {
-        // if you have a notes field on each tx, adapt here
-        const tbody = document.getElementById('notesTable');
-        tbody.innerHTML = '';
-        const notesOnly = data.filter(tx => tx.notes);
-        if (!notesOnly.length) {
-          tbody.innerHTML = '<tr><td colspan="2" class="text-center">No notes</td></tr>';
-        } else {
-          notesOnly.forEach(tx => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td>${new Date(tx.date).toLocaleDateString()}</td>
-              <td>${tx.notes}</td>
-            `;
-            tbody.appendChild(tr);
-          });
-        }
-      }
-
-      // ---- Download as CSV ----
-      function downloadExpenses() {
-        // Build CSV from filtered dayTable…
-        // Trigger a blob download…
-        // (you can also do JSON if you prefer)
-      }
-    </script>
-  </body>
-</html>
+   
