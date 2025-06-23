@@ -53,13 +53,14 @@ const getExpenseById = async (req, res) => {
 const postExpense = async (req, res) => {
         const t = await sequelize.transaction();
     try {
-        const { expenseamount, description, category } = req.body;
+        const { expenseamount, description, category, note } = req.body;
          const userId = req.user.id;
         const newExpense = await Expense.create({
             expenseamount,
             description,
             category,
-            userId: userId
+            userId: userId,
+            note
                }, 
                { transaction: t
         });

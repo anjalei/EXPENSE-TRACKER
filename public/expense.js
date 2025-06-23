@@ -128,7 +128,8 @@ async function addExpense(event) {
   const expenseamount = document.getElementById("expenseamount").value;
   const description = document.getElementById("description").value;
   const category = document.getElementById("category").value;
-  const obj = { expenseamount, description, category };
+  const note=document.getElementById("note").value;
+  const obj = { expenseamount, description, category , note};
 
   await addNewExpenses(obj);
 }
@@ -152,6 +153,7 @@ async function addNewExpenses(obj) {
     document.getElementById("expenseamount").value = "";
     document.getElementById("description").value = "";
     document.getElementById("category").value = "";
+     document.getElementById("note").value="";
 
   } catch (error) {
     console.error(error);
@@ -166,10 +168,14 @@ const parent = document.getElementById("allExpenselist");
   li.id = expense.id;
 
   li.innerHTML = `
-    ${expense.expenseamount} ${expense.description} ${expense.category}
-    <input type="button" value="Delete" onclick="deleteExpense('${expense.id}')">
-    <input type="button" value="Edit" onclick="editExpense('${expense.id}', '${expense.expenseamount}', '${expense.description}', '${expense.category}')">
-  `;
+  <strong>Amount:</strong> ₹${expense.expenseamount} <br>
+  <strong>Description:</strong> ${expense.description} <br>
+  <strong>Category:</strong> ${expense.category} <br>
+  <strong>Note:</strong> ${expense.note ? expense.note : '—'} <br>
+  <input type="button" value="Delete" onclick="deleteExpense('${expense.id}')">
+  <input type="button" value="Edit" onclick="editExpense('${expense.id}', '${expense.expenseamount}', '${expense.description}', '${expense.category}', \`${expense.note || ""}\`)">
+`;
+
 
   parent.appendChild(li);
 }
@@ -197,11 +203,12 @@ async function deleteExpense(expenseId) {
   }
 }
 
-async function editExpense(expenseId, expenseamount, description, category) {
+async function editExpense(expenseId, expenseamount, description, category,note) {
 
   document.getElementById("expenseamount").value = expenseamount;
   document.getElementById("description").value = description;
   document.getElementById("category").value = category;
+  document.getElementById("note").value= note;
 
   
   const expenseDetails = document.getElementById(expenseId);
@@ -218,6 +225,7 @@ async function editExpense(expenseId, expenseamount, description, category) {
         expenseamount: document.getElementById("expenseamount").value,
         description: document.getElementById("description").value,
         category: document.getElementById("category").value,
+        note:document.getElementById("note").value,
       };
 
       const token = localStorage.getItem("token");
@@ -239,7 +247,7 @@ async function editExpense(expenseId, expenseamount, description, category) {
       document.getElementById("expenseamount").value = "";
       document.getElementById("description").value = "";
       document.getElementById("category").value = "";
-
+      document.getElementById("note").value="";
       submitButton.textContent = "ADD";
       submitButton.onclick = (e) => addExpense(e);
 
