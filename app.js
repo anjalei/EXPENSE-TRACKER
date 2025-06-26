@@ -5,16 +5,16 @@ const bodyParser = require('body-parser');
 const axios = require('axios');
 const cors = require('cors');
 const path = require('path');
+//const helmet = require('helmet');
+const compression = require('compression');
 
 const sequelize = require('./util/database');
-
 
 const userRoutes = require('./routes/user');
 const expenseRoutes = require('./routes/expense');
 const paymentRoutes = require('./routes/payment');
 const leaderboardRoutes = require('./routes/leaderboard');
 const passwordRoutes=require('./routes/password');
-
 
 const User = require('./model/user');
 const Expense = require('./model/expense');
@@ -31,12 +31,10 @@ Premium.belongsTo(User);
 User.hasMany(ForgotPasswordRequest, { foreignKey: 'userId' });
 ForgotPasswordRequest.belongsTo(User, { foreignKey: 'userId' });
 
-
+//app.use(helmet());
 app.use(cors());
 app.use(express.static('public'));
-
-
-
+app.use(compression());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
