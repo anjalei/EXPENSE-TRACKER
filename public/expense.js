@@ -32,6 +32,8 @@ document.getElementById("nextPageBtn").addEventListener("click", () => {
 });
 
 
+
+
 async function fetchExpenses() {
   try {
     const token = localStorage.getItem("token");
@@ -258,3 +260,54 @@ async function editExpense(expenseId, expenseamount, description, category,note)
     }
   };
 }
+
+document.getElementById('downloadBtn').addEventListener('click', async () => {
+  const token = localStorage.getItem('token');
+
+  try {
+    const res = await axios.get('http://localhost:3000/api/download', {
+      headers: { Authorization: `Bearer ${token}` }
+
+    });
+
+    if (res.status === 200) {
+      const a = document.createElement('a');
+      a.href = res.data.fileURL;
+      a.download = 'expenses.json';
+      a.click();
+      alert("✅ Download started!");
+
+    } else {
+      alert('Download failed: Not authorized');
+    }
+  } catch (err) {
+    alert('Error occurred while downloading');
+    console.log(err);
+  }
+});
+
+window.addEventListener('DOMContentLoaded', fetchDownloadHistory);
+
+async function fetchDownloadHistory() {
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await axios.get('http://localhost:3000/api/download/history', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const historyList = document.getElementById("download-history");
+    historyList.innerHTML = "";
+
+    res.data.files.forEach(file => {
+      const li = document.createElement("li");
+      li.innerHTML = `<a href="${file.fileURL}" target="_blank">Download from ${new Date(file.downloadDate).toLocaleString()}</a>`;
+      historyList.appendChild(li);
+    });
+
+  } catch (err) {
+    console.error("❌ Could not fetch download history", err);
+  }
+}
+
+

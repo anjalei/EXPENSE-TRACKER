@@ -41,7 +41,7 @@ async function loginUser(event) {
     }
 
     try {
-        const res = await axios.post("http://localhost:3000/api/login", { email, password });
+        const res = await axios.post("http://3.109.202.33/api/login", { email, password });
             const { token, isPremiumUser, message } = res.data; 
         localStorage.setItem('token', token);
         alert(res.data.message);

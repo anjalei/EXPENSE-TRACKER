@@ -8,4 +8,5 @@ router.post('/post',addUser);
 router.post('/login', loginUser);
 router.get('/user/status', authenticateUser,getUserStatus);
 
+
 module.exports = router;

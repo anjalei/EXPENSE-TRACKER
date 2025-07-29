@@ -1,6 +1,9 @@
 const Expense = require('../model/expense');
 const User = require('../model/user');
 const sequelize = require('../util/database');
+const { uploadToS3,getDownloadLink } = require('../services/s3Services');
+const DownloadedFile = require('../model/downloadedFile');
+
 
 
 const getExpense = async (req, res) => {
@@ -144,10 +147,61 @@ const deleteExpenseById = async (req, res) => {
 
 
 
+const downloadExpenses = async (req, res) => {
+  try {
+    const user = req.user; 
+
+
+if (!user || !user.isPremium) {
+  return res.status(401).json({ message: 'Unauthorized: Not a premium user' });
+}
+console.log("🔐 req.user in downloadExpenses:", req.user);
+
+
+    const expenses = await Expense.findAll({ where: { userId: user.id } });
+    const stringifiedExpenses = JSON.stringify(expenses, null, 2);
+    const filename = `Expenses-${user.id}/${new Date().toISOString()}.json`;
+
+    await uploadToS3(stringifiedExpenses, filename); 
+    const fileURL = getDownloadLink(filename); 
+await DownloadedFile.create({
+  fileURL: 'https://example.com/test.json',
+  userId: 10  // Use any valid user ID
+});
+
+//     await DownloadedFile.create({
+//   fileURL,
+//   userId: user.id
+// });
+ res.status(200).json({ fileURL });
+
+  } catch (error) {
+    console.error('❌ Error in downloadExpenses:', error.message);
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+};
+
+const getDownloadHistory = async (req, res) => {
+  try {
+    const files = await DownloadedFile.findAll({
+      where: { userId: req.user.id },
+      order: [['downloadDate', 'DESC']],
+    });
+
+    res.status(200).json({ files });
+  } catch (error) {
+    console.error("❌ Error fetching download history:", error.message);
+    res.status(500).json({ error: 'Failed to fetch download history' });
+  }
+};
+
+
 module.exports = {
     getExpense,
     getExpenseById,
     postExpense,
     updateExpenseById,
-    deleteExpenseById
+    deleteExpenseById,
+    downloadExpenses,
+    getDownloadHistory
 };

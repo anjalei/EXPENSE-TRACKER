@@ -1,4 +1,4 @@
-const Premium = require('../model/Premium');
+const Premium = require('../model/premium');
 const User = require("../model/user");
 const cashfreeService = require('../services/cashfreeService');
 const {Cashfree}=require('cashfree-pg');
